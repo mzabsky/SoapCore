@@ -118,7 +118,7 @@ namespace SoapCore.Meta
 
 		private static string GetDataContractNamespace(Type type)
 		{
-			if (type.IsArray || typeof(IEnumerable).IsAssignableFrom(type))
+			if (type.IsArray || (typeof(IEnumerable).IsAssignableFrom(type) && type.IsGenericType))
 			{
 				var collectionDataContractAttribute = type.GetCustomAttribute<CollectionDataContractAttribute>();
 				if (collectionDataContractAttribute != null)
@@ -131,6 +131,11 @@ namespace SoapCore.Meta
 					{
 						type = type.IsArray ? type.GetElementType() : GetGenericType(type);
 					}
+				}
+
+				if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(List<>))
+				{
+					type = GetGenericType(type);
 				}
 			}
 
