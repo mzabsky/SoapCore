@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Data;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -180,7 +181,7 @@ namespace SoapCore.Meta
 				var parameterName = !string.IsNullOrEmpty(elementAttribute?.ElementName)
 										? elementAttribute.ElementName
 										: parameterInfo.Parameter.GetCustomAttribute<MessageParameterAttribute>()?.Name ?? parameterInfo.Parameter.Name;
-				AddSchemaType(writer, parameterInfo.Parameter.ParameterType, parameterName, objectNamespace: elementAttribute?.Namespace ?? (parameterInfo.Namespace != "http://tempuri.org/" ? parameterInfo.Namespace : null));
+				AddSchemaType(writer, parameterInfo.Parameter.ParameterType, parameterName, objectNamespace: elementAttribute?.Namespace);
 			}
 		}
 
