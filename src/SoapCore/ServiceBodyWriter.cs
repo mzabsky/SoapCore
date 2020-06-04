@@ -267,7 +267,15 @@ namespace SoapCore
 		{
 			Debug.Assert(_outResults != null, "Object should set empty out results");
 
-			writer.WriteStartElement(_envelopeName, _serviceNamespace);
+			var messageContractAttribute =
+				_operation.IsMessageContractResponse
+					? _result.GetType().GetCustomAttribute<MessageContractAttribute>()
+					: null;
+
+			if (messageContractAttribute?.IsWrapped == true)
+			{
+				writer.WriteStartElement(_envelopeName, _serviceNamespace);
+			}
 
 			foreach (var outResult in _outResults)
 			{
@@ -323,6 +331,30 @@ namespace SoapCore
 					WriteStream(writer, _result);
 					writer.WriteEndElement();
 				}
+				else if (_operation.IsMessageContractResponse)
+				{
+					//Debugger.Launch();
+					foreach (var memberInfo in _result.GetType().GetMembersWithAttribute<MessageBodyMemberAttribute>())
+					{
+						switch (memberInfo)
+						{
+							case PropertyInfo propertyInfo:
+							{
+								var messageBodyMember = propertyInfo.GetCustomAttribute<MessageBodyMemberAttribute>();
+								var serializer = new DataContractSerializer(propertyInfo.PropertyType, messageBodyMember.Name ?? propertyInfo.Name, messageBodyMember.Namespace ??  _serviceNamespace);
+								serializer.WriteObject(writer, propertyInfo.GetValue(_result));
+								break;
+							}
+							case FieldInfo fieldInfo:
+							{
+								var messageBodyMember = fieldInfo.GetCustomAttribute<MessageBodyMemberAttribute>();
+								var serializer = new DataContractSerializer(fieldInfo.FieldType, messageBodyMember.Name ?? fieldInfo.Name, messageBodyMember.Namespace ??  _serviceNamespace);
+								serializer.WriteObject(writer, fieldInfo.GetValue(_result));
+								break;
+							}
+						}
+					}
+				}
 				else
 				{
 					var serializer = new DataContractSerializer(_result.GetType(), _resultName, _serviceNamespace);
@@ -330,7 +362,11 @@ namespace SoapCore
 				}
 			}
 
-			writer.WriteEndElement();
+			if (messageContractAttribute?.IsWrapped == true)
+			{
+				writer.WriteEndElement();
+			}
+
 		}
 	}
 }
