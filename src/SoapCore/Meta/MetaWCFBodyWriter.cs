@@ -122,16 +122,13 @@ namespace SoapCore.Meta
 			if (type.IsArray || (typeof(IEnumerable).IsAssignableFrom(type) && type.IsGenericType))
 			{
 				var collectionDataContractAttribute = type.GetCustomAttribute<CollectionDataContractAttribute>();
-				if (collectionDataContractAttribute != null)
+				if (collectionDataContractAttribute != null && collectionDataContractAttribute.IsNamespaceSetExplicitly)
 				{
-					if (collectionDataContractAttribute.IsNamespaceSetExplicitly)
-					{
-						return collectionDataContractAttribute.Namespace;
-					}
-					else
-					{
-						type = type.IsArray ? type.GetElementType() : GetGenericType(type);
-					}
+					return collectionDataContractAttribute.Namespace;
+				}
+				else
+				{
+					type = type.IsArray ? type.GetElementType() : GetGenericType(type);
 				}
 
 				if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(List<>))
@@ -735,7 +732,7 @@ namespace SoapCore.Meta
 
 			writer.WriteStartElement("xs", "complexType", Namespaces.XMLNS_XSD);
 			writer.WriteAttributeString("name", toBuildName);
-			writer.WriteAttributeString("ser", "xmlns", Namespaces.SERIALIZATION_NS);
+			writer.WriteAttributeString("xmlns", "ser", null, Namespaces.SERIALIZATION_NS);
 
 			if (type.IsValueType && ResolveSystemType(type).name == null)
 			{
@@ -766,7 +763,7 @@ namespace SoapCore.Meta
 				{
 					var ns = $"q{_namespaceCounter++}";
 					writer.WriteAttributeString("base", $"{ns}:{typeName}");
-					writer.WriteAttributeString($"{ns}", "xmlns", modelNamespace);
+					writer.WriteAttributeString("xmlns", ns, null, modelNamespace);
 				}
 				else
 				{
@@ -886,7 +883,7 @@ namespace SoapCore.Meta
 				writer.WriteAttributeString("name", "detail");
 				var ns = $"q{_namespaceCounter++}";
 				writer.WriteAttributeString("element", $"{ns}:{fault.Name}");
-				writer.WriteAttributeString($"xmlns:{ns}", GetDataContractNamespace(fault));
+				writer.WriteAttributeString("xmlns", ns, null, GetDataContractNamespace(fault));
 				writer.WriteEndElement(); // wsdl:part
 				writer.WriteEndElement(); // wsdl:message
 			}
@@ -1198,7 +1195,7 @@ namespace SoapCore.Meta
 						writer.WriteAttributeString("name", name);
 						writer.WriteAttributeString("nillable", "true");
 						writer.WriteAttributeString("type", $"{ns}:ArrayOf{sysType.name}");
-						
+
 						_arrayToBuild.Enqueue(type);
 					}
 					else
