@@ -516,11 +516,13 @@ namespace SoapCore
 
 				var @namespace = parameterInfo.Namespace ?? operation.Contract.Namespace;
 
-				if (messageContractAttribute.IsWrapped && !parameterType.GetMembersWithAttribute<MessageHeaderAttribute>().Any())
+				//https://github.com/DigDes/SoapCore/issues/385
+				if (
+					messageContractAttribute.IsWrapped &&
+					!parameterType.GetMembersWithAttribute<MessageHeaderAttribute>().Any() &&
+					operation.DispatchMethod.GetCustomAttribute<XmlSerializerFormatAttribute>()?.Style == OperationFormatStyle.Rpc
+				)
 				{
-					//https://github.com/DigDes/SoapCore/issues/385
-					if (operation.DispatchMethod.GetCustomAttribute<XmlSerializerFormatAttribute>()?.Style == OperationFormatStyle.Rpc)
-					{
 						var importer = new SoapReflectionImporter(@namespace);
 						var map = new XmlReflectionMember
 						{
@@ -535,12 +537,18 @@ namespace SoapCore
 						{
 							arguments[parameterInfo.Index] = o[0];
 						}
-					}
+					/*}
 					else
 					{
 						// It's wrapped so we treat it like normal!
-						arguments[parameterInfo.Index] = _serializerHelper.DeserializeInputParameter(xmlReader, parameterInfo.Parameter.ParameterType, parameterInfo.Name, @namespace, parameterInfo);
-					}
+						arguments[parameterInfo.Index] = _serializerHelper.DeserializeInputParameter(
+							xmlReader,
+							parameterInfo.Parameter.ParameterType,
+							messageContractAttribute.WrapperName ?? parameterInfo.Parameter.ParameterType.Name,
+							messageContractAttribute.WrapperNamespace ?? @namespace,
+							parameterInfo
+						);
+					}*/
 				}
 				else
 				{
