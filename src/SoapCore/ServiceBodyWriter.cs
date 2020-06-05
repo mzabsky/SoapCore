@@ -272,9 +272,16 @@ namespace SoapCore
 					? _result.GetType().GetCustomAttribute<MessageContractAttribute>()
 					: null;
 
-			if (messageContractAttribute?.IsWrapped == true)
+			if (!_operation.IsMessageContractResponse)
 			{
 				writer.WriteStartElement(_envelopeName, _serviceNamespace);
+			}
+			else if (messageContractAttribute.IsWrapped)
+			{
+				writer.WriteStartElement(
+					messageContractAttribute.WrapperName ?? _result.GetType().Name,
+					messageContractAttribute.WrapperNamespace ?? _result.GetType().Namespace
+				);
 			}
 
 			foreach (var outResult in _outResults)
@@ -362,7 +369,7 @@ namespace SoapCore
 				}
 			}
 
-			if (messageContractAttribute?.IsWrapped == true)
+			if (messageContractAttribute?.IsWrapped != false)
 			{
 				writer.WriteEndElement();
 			}
