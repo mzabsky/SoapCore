@@ -21,7 +21,7 @@ namespace SoapCore.MessageEncoder
 	/// Wraps a <see cref="PipeReader"/> and/or <see cref="PipeWriter"/> as a <see cref="Stream"/> for
 	/// easier interop with existing APIs.
 	/// </summary>
-	internal partial class PipeStream : Stream, IDisposableObservable
+	internal partial class PipeStream : Stream
 	{
 		/// <summary>
 		/// The <see cref="PipeWriter"/> to use when writing to this stream. May be null.
@@ -50,7 +50,7 @@ namespace SoapCore.MessageEncoder
 		/// <param name="ownsPipe"><c>true</c> to complete the underlying reader and writer when the <see cref="Stream"/> is disposed; <c>false</c> to keep them open.</param>
 		internal PipeStream(PipeWriter writer, bool ownsPipe)
 		{
-			Requires.NotNull(writer, nameof(writer));
+			//Requires.NotNull(writer, nameof(writer));
 			_writer = writer;
 			_ownsPipe = ownsPipe;
 		}
@@ -62,7 +62,7 @@ namespace SoapCore.MessageEncoder
 		/// <param name="ownsPipe"><c>true</c> to complete the underlying reader and writer when the <see cref="Stream"/> is disposed; <c>false</c> to keep them open.</param>
 		internal PipeStream(PipeReader reader, bool ownsPipe)
 		{
-			Requires.NotNull(reader, nameof(reader));
+			//Requires.NotNull(reader, nameof(reader));
 			_reader = reader;
 			_ownsPipe = ownsPipe;
 		}
@@ -74,7 +74,7 @@ namespace SoapCore.MessageEncoder
 		/// <param name="ownsPipe"><c>true</c> to complete the underlying reader and writer when the <see cref="Stream"/> is disposed; <c>false</c> to keep them open.</param>
 		internal PipeStream(IDuplexPipe pipe, bool ownsPipe)
 		{
-			Requires.NotNull(pipe, nameof(pipe));
+			//Requires.NotNull(pipe, nameof(pipe));
 
 			_writer = pipe.Output;
 			_reader = pipe.Input;
@@ -139,11 +139,11 @@ namespace SoapCore.MessageEncoder
 		/// <inheritdoc />
 		public override async Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
 		{
-			Requires.NotNull(buffer, nameof(buffer));
-			Requires.Range(offset + count <= buffer.Length, nameof(count));
-			Requires.Range(offset >= 0, nameof(offset));
-			Requires.Range(count > 0, nameof(count));
-			Verify.NotDisposed(this);
+			//Requires.NotNull(buffer, nameof(buffer));
+			//Requires.Range(offset + count <= buffer.Length, nameof(count));
+			//Requires.Range(offset >= 0, nameof(offset));
+			//Requires.Range(count > 0, nameof(count));
+			//Verify.NotDisposed(this);
 
 			if (_reader == null)
 			{
@@ -164,7 +164,7 @@ namespace SoapCore.MessageEncoder
 		public override async ValueTask<int> ReadAsync(Memory<byte> buffer, CancellationToken cancellationToken = default)
 		{
 			cancellationToken.ThrowIfCancellationRequested();
-			Verify.NotDisposed(this);
+			//Verify.NotDisposed(this);
 
 			if (_reader == null)
 			{
@@ -183,7 +183,7 @@ namespace SoapCore.MessageEncoder
 		/// <inheritdoc />
 		public override int Read(Span<byte> buffer)
 		{
-			Verify.NotDisposed(this);
+			//Verify.NotDisposed(this);
 			if (_reader == null)
 			{
 				throw new NotSupportedException();
@@ -199,7 +199,7 @@ namespace SoapCore.MessageEncoder
 		public override ValueTask WriteAsync(ReadOnlyMemory<byte> buffer, CancellationToken cancellationToken = default)
 		{
 			cancellationToken.ThrowIfCancellationRequested();
-			Verify.NotDisposed(this);
+			//Verify.NotDisposed(this);
 			if (_writer == null)
 			{
 				throw new NotSupportedException();
@@ -212,7 +212,7 @@ namespace SoapCore.MessageEncoder
 		/// <inheritdoc />
 		public override void Write(ReadOnlySpan<byte> buffer)
 		{
-			Verify.NotDisposed(this);
+			//Verify.NotDisposed(this);
 			if (_writer == null)
 			{
 				throw new NotSupportedException();
@@ -261,13 +261,13 @@ namespace SoapCore.MessageEncoder
 
 		private T ReturnIfNotDisposed<T>(T value)
 		{
-			Verify.NotDisposed(this);
+			//Verify.NotDisposed(this);
 			return value;
 		}
 
 		private Exception ThrowDisposedOr(Exception ex)
 		{
-			Verify.NotDisposed(this);
+			//Verify.NotDisposed(this);
 			throw ex;
 		}
 

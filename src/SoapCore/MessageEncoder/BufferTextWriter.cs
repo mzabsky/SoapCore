@@ -95,10 +95,10 @@ namespace SoapCore.MessageEncoder
 		/// <param name="encoding">The encoding to use.</param>
 		public void Initialize(IBufferWriter<byte> bufferWriter, Encoding encoding)
 		{
-			Requires.NotNull(bufferWriter, nameof(bufferWriter));
-			Requires.NotNull(encoding, nameof(encoding));
+			//Requires.NotNull(bufferWriter, nameof(bufferWriter));
+			//Requires.NotNull(encoding, nameof(encoding));
 
-			Verify.Operation(_memoryPosition == 0 && _charBufferPosition == 0, "This instance must be flushed before being reinitialized.");
+			//Verify.Operation(_memoryPosition == 0 && _charBufferPosition == 0, "This instance must be flushed before being reinitialized.");
 
 			_preambleWritten = false;
 			_bufferWriter = bufferWriter;
@@ -165,7 +165,8 @@ namespace SoapCore.MessageEncoder
 		}
 
 		/// <inheritdoc />
-		public override void Write(char[] buffer, int index, int count) => Write(Requires.NotNull(buffer, nameof(buffer)).AsSpan(index, count));
+		public override void Write(char[] buffer, int index, int count) => Write(
+			buffer.AsSpan(index, count));
 
 #if SPAN_BUILTIN
 		/// <inheritdoc />
