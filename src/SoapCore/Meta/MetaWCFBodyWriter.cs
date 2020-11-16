@@ -695,8 +695,17 @@ namespace SoapCore.Meta
 
 			if (!_builtEnumTypes.Contains(typeName))
 			{
+				var isFlags = type.GetCustomAttribute<FlagsAttribute>() != null;
+
 				writer.WriteStartElement("xs", "simpleType", Namespaces.XMLNS_XSD);
 				writer.WriteAttributeString("name", typeName);
+
+				if (isFlags)
+				{
+					writer.WriteStartElement("xs", "list", Namespaces.XMLNS_XSD);
+					writer.WriteStartElement("xs", "simpleType", Namespaces.XMLNS_XSD);
+				}
+
 				writer.WriteStartElement("xs", "restriction", Namespaces.XMLNS_XSD);
 				writer.WriteAttributeString("base", "xs:string");
 
@@ -715,6 +724,13 @@ namespace SoapCore.Meta
 				}
 
 				writer.WriteEndElement(); // xs:restriction
+
+				if (isFlags)
+				{
+					writer.WriteEndElement(); // xs:simpleType
+					writer.WriteEndElement(); // xs:list
+				}
+
 				writer.WriteEndElement(); // xs:simpleType
 
 				_builtEnumTypes.Add(typeName);
